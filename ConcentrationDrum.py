@@ -9,7 +9,6 @@ from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
 
 from pandas import Series, DataFrame
-from pandas._typing import NDFrameT
 
 NF = 30  # number of files
 NP = 20000  # number of particles
