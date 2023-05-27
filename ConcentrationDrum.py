@@ -90,7 +90,6 @@ y = desvio_df['Indice_1']
 z = desvio_df['Indice_2']
 
 y1 = y.rolling(5).mean()
-#print(y1)
 
 plt.plot(x, y1, color='r', label='Indice_1', linewidth=4)
 #plt.plot(x, z, color='g', label='Indice_2')
