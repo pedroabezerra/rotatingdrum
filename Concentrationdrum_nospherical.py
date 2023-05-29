@@ -191,3 +191,19 @@ R2_teste = r2_score(Y,pedrinho(X, K, ISF))
 
 print(mse)
 print(R2_teste)
+
+img_g=mpimg.imread(path+'g_1.jpg')
+img_t=mpimg.imread(path+'t_1.jpeg')
+
+f, axs = plt.subplots(1,2)
+
+axs[0].imshow(img_g) 
+axs[1].imshow(img_t)
+
+axs = plt.gca()
+axs.get_xaxis().set_visible(False)
+axs.get_yaxis().set_visible(False)
+
+#axs.set_axis_off()
+#axs = axs.flatten()
+plt.show()
