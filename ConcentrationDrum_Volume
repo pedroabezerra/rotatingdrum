@@ -11,8 +11,8 @@ from sklearn.metrics import r2_score
 
 from pandas import Series, DataFrame
 
-NF = 30  # number of files
-NP = 20000  # number of particles
+NF = 50  # number of files
+NP = 47250  # number of particles
 
 
 #dataframes para salvar dados
@@ -33,7 +33,7 @@ esp_y = (max_y - min_y) / nd_y
 
 for m in range(0, NF):
     home = os.path.expanduser("~")
-    path = f"/home/n001/Documents/Pedro_Antonio/naoesferica/ar04/dados/rot__{m}.csv"
+    path = f"/home/n001/Documents/Pedro_Antonio/efeito_dimensao_do_tambor/blocagem1/01/dados/rot__{m}.csv"
     dados = pd.read_csv(path, sep=",")
     Dados_filter = dados.filter(items=['type', 'Points:0', 'Points:1','radius'])
 
