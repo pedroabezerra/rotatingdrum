@@ -1,4 +1,5 @@
 import os
+import math
 from typing import Any
 
 import numpy as np
@@ -13,7 +14,11 @@ from pandas import Series, DataFrame
 NF = 30  # number of files
 NP = 20000  # number of particles
 
+
+#dataframes para salvar dados
 desvio_df = pd.DataFrame(columns=["Indice_1","Indice_2", 't'])
+#v1 = pd.DataFrame()
+#v2 = pd.DataFrame()
 
 # construção das repartições no tambor
 nd_x = 5
@@ -26,16 +31,29 @@ min_y = -0.075
 esp_x = (max_x - min_x) / nd_x
 esp_y = (max_y - min_y) / nd_y
 
-# leitura dos dados
-
 for m in range(0, NF):
     home = os.path.expanduser("~")
     path = f"/home/n001/Documents/Pedro_Antonio/naoesferica/ar04/dados/rot__{m}.csv"
     dados = pd.read_csv(path, sep=",")
     Dados_filter = dados.filter(items=['type', 'Points:0', 'Points:1','radius'])
 
+    #filter by radius of particles
+    Dados_filter_r1 = Dados_filter[Dados_filter.type == 1]
+    Dados_filter_r2 = Dados_filter[Dados_filter.type == 2]
+    Dados_filter_r1.reset_index(inplace=True, drop=True)
+    Dados_filter_r2.reset_index(inplace=True, drop=True)
 
-    # construção do ponteiro para localização
+    #calculate volumn of particles
+
+    v1 = 4/3*(math.pi*(Dados_filter_r1['radius'])**3)
+    v2 = 4/3*(math.pi*(Dados_filter_r2['radius'])**3)
+    Dados_filter_r1['v1'] = v1
+    Dados_filter_r2['v2'] = v2
+    Dados_filter = pd.merge(Dados_filter_r1, Dados_filter_r2, how='outer')
+    Dados_filter = Dados_filter.replace(np.nan, 0)
+
+
+    #construção do ponteiro para localização
     cd1 = Dados_filter
     cd1['Points:0'] = Dados_filter['Points:0'].div(esp_x).round(0) + 3
     cd1['Points:1'] = Dados_filter['Points:1'].div(esp_y).round(0) + 3
@@ -43,33 +61,33 @@ for m in range(0, NF):
     cd1 = cd1.assign(posicao=posicao.values)
 
     # contagem de particulas repetidas em cada posição
-    count = cd1.groupby(['type', 'posicao']).size().reset_index(name='count')
+    count = cd1.groupby(['type', 'posicao', 'v1','v2']).size().reset_index(name='count')
     count2 = pd.DataFrame(count)
     dftype1 = count2[(count2.type == 1)]
     dftype2 = count2[(count2.type == 2)]
     dftype1.reset_index(inplace=True, drop=True)
     dftype2.reset_index(inplace=True, drop=True)
 
-    # Dataframe de zeros para preenchimento
+    #Dataframe de zeros para preenchimento
     count3 = pd.DataFrame(0, columns=['type', 'posicao', 'count'], index=range(25))
     count4 = pd.DataFrame(0, columns=['type', 'posicao', 'count'], index=range(25))
     posicao1 = list(range(1, 26, 1))
     posicao2 = list(range(1, 26, 1))
     count3['posicao'] = posicao1
     count4['posicao'] = posicao2
-
     count3 = pd.concat([dftype1, count3], axis=0).sort_values(by='posicao', axis=0, ascending=True,
                                                               kind='stable').drop_duplicates('posicao')
     count4 = pd.concat([dftype2, count4], axis=0).sort_values(by='posicao', axis=0, ascending=True,
                                                               kind='stable').drop_duplicates('posicao')
-
-    # cálculo da concentração por tipo de partícula
+    count3 = count3.replace(np.nan, 0)
+    count4 = count4.replace(np.nan, 0)
+    #cálculo da concentração por tipo de partícula
 
     total_count_df = pd.merge(count3, count4, on='posicao', how='left')
     total_count = total_count_df['count_x'].add(total_count_df['count_y'], fill_value=0)
     total_count_df['total_count'] = total_count
-    total_count_df['concentracao_1'] = total_count_df['count_x']/ total_count_df['total_count']
-    total_count_df['concentracao_2'] = total_count_df['count_y'] / total_count_df['total_count']
+    total_count_df['concentracao_1'] = (total_count_df['count_x']* total_count_df['v1_x'])/ (total_count_df['count_x']* total_count_df['v1_x']+total_count_df['count_y']* total_count_df['v2_y'])
+    total_count_df['concentracao_2'] = (total_count_df['count_y']* total_count_df['v2_y'])/ (total_count_df['count_x']* total_count_df['v1_x']+total_count_df['count_y']* total_count_df['v2_y'])
     total_count_df = total_count_df.replace(np.nan, 0)
 
     # filtro dos dados de concencetração
@@ -81,7 +99,7 @@ for m in range(0, NF):
     #desvio_df[f'concentracao_2_{m}'] = [IS_2] para adicionar colunas
     desvio_df.loc[f'{0}'] = [0.5 , 0.5, 0]
     desvio_df.loc[f'{m+1}'] = [IS_1, IS_2, f'{m+1}']
-    
+
 print(total_count_df)
 print(desvio_df)
 
@@ -131,3 +149,4 @@ R2_teste = r2_score(Y,pedrinho(X, K, ISF))
 
 print(mse)
 print(R2_teste)
+
