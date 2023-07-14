@@ -192,8 +192,8 @@ R2_teste = r2_score(Y,pedrinho(X, K, ISF))
 print(mse)
 print(R2_teste)
 
-img_g=mpimg.imread(path+'g_1.jpg')
-img_t=mpimg.imread(path+'t_1.jpeg')
+img_g = mpimg.imread(path+'g_1.jpg')
+img_t = mpimg.imread(path+'t_1.jpeg')
 
 f, axs = plt.subplots(1,2)
 

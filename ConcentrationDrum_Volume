@@ -12,7 +12,7 @@ from sklearn.metrics import r2_score
 from pandas import Series, DataFrame
 
 NF = 50  # number of files
-NP = 47250  # number of particles
+NP = 10500  # number of particles
 
 
 #dataframes para salvar dados
@@ -33,13 +33,13 @@ esp_y = (max_y - min_y) / nd_y
 
 for m in range(0, NF):
     home = os.path.expanduser("~")
-    path = f"/home/n001/Documents/Pedro_Antonio/efeito_dimensao_do_tambor/blocagem1/01/dados/rot__{m}.csv"
+    path = f"/home/n005/Documents/Pedro_Antonio/sens_dens/9/dados/rot__{m}.csv"
     dados = pd.read_csv(path, sep=",")
     Dados_filter = dados.filter(items=['type', 'Points:0', 'Points:1','radius'])
 
     #filter by radius of particles
-    Dados_filter_r1 = Dados_filter[Dados_filter.type == 1]
-    Dados_filter_r2 = Dados_filter[Dados_filter.type == 2]
+    Dados_filter_r1 = Dados_filter.loc[(Dados_filter.type == 1)]
+    Dados_filter_r2 = Dados_filter.loc[(Dados_filter.type == 2)]
     Dados_filter_r1.reset_index(inplace=True, drop=True)
     Dados_filter_r2.reset_index(inplace=True, drop=True)
 
@@ -47,8 +47,9 @@ for m in range(0, NF):
 
     v1 = 4/3*(math.pi*(Dados_filter_r1['radius'])**3)
     v2 = 4/3*(math.pi*(Dados_filter_r2['radius'])**3)
-    Dados_filter_r1['v1'] = v1
-    Dados_filter_r2['v2'] = v2
+
+    Dados_filter_r1.loc[:,'v1'] = v1
+    Dados_filter_r2.loc[:,'v2'] = v2
     Dados_filter = pd.merge(Dados_filter_r1, Dados_filter_r2, how='outer')
     Dados_filter = Dados_filter.replace(np.nan, 0)
 
@@ -100,7 +101,6 @@ for m in range(0, NF):
     desvio_df.loc[f'{0}'] = [0.5 , 0.5, 0]
     desvio_df.loc[f'{m+1}'] = [IS_1, IS_2, f'{m+1}']
 
-print(total_count_df)
 print(desvio_df)
 
 #construção do gráfico
