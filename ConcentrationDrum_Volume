@@ -45,12 +45,12 @@ for m in range(0, NF):
 
     #calculate volumn of particles
 
-    v1 = 4/3*(math.pi*(Dados_filter_r1['radius'])**3)
-    v2 = 4/3*(math.pi*(Dados_filter_r2['radius'])**3)
+    v1 = list(4/3*(math.pi*(Dados_filter_r1['radius'])**3))
+    v2 = list(4/3*(math.pi*(Dados_filter_r2['radius'])**3))
 
-    Dados_filter_r1.loc[:,'v1'] = v1
-    Dados_filter_r2.loc[:,'v2'] = v2
-    Dados_filter = pd.merge(Dados_filter_r1, Dados_filter_r2, how='outer')
+    Dados_filter_r11['v1'] = v1
+    Dados_filter_r22['v2'] = v2
+    Dados_filter = pd.merge(Dados_filter_r11, Dados_filter_r22, how='outer')
     Dados_filter = Dados_filter.replace(np.nan, 0)
 
 
