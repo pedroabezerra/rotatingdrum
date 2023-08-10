@@ -12,9 +12,11 @@ from sklearn.metrics import r2_score
 
 from pandas import Series, DataFrame
 
+
+
 NF = 50  # number of files
 NP = 10500  # number of particles
-folders = 10
+folders = [4,5,9]
 
 #dataframes para salvar dados
 desvio_df = pd.DataFrame(columns=["Indice_1","Indice_2", 't'])
@@ -35,13 +37,14 @@ mse_final = np.zeros(folders)
 r_final = np.zeros(folders)
 k_final = np.zeros(folders)
 isf_final = np.zeros(folders)
+blocagens = ['','Mistura Associada','Mistura Concorrente']
 
-
-for r in range (1,folders,1):
+#for w in range(1,3,1):
+for r in range (0,len(folders),1):
+    aux = folders[r]
     for m in range(0, NF):
             home = os.path.expanduser("~")
-            
-            path = f"/home/n002/Documents/Pedro_Antonio/efeito_dimensao_do_tambor/blocagem2/{r}/dados/"
+            path = f"/home/n002/Documents/Pedro_Antonio/sens_taman/{aux}/dados/"
             dados = pd.read_csv(path+f'rot__{m}.csv', sep=",")
             Dados_filter = dados.filter(items=['type', 'Points:0', 'Points:1','radius'])
 
@@ -118,56 +121,22 @@ for r in range (1,folders,1):
 
     y1 = y.rolling(5).mean()
 
-    plt.plot(x, y, color='k', label='Indice_1', linewidth=3)
+    plt.plot(x, y, label= f'Simulação {aux}', linewidth=3)
     plt.grid(True, linestyle='--')
-    plt.title(f'Simulação {r}', color='black', fontsize=20, fontweight='bold')
+    plt.title(f'Razão de Tamanho', color='black', fontsize=20, fontweight='bold')
     plt.xlabel('Tempo (s)', color='black', fontsize=14, fontweight='bold')
     plt.ylabel('IMF ( - )', color='black', fontsize=14, fontweight='bold')
     plt.xticks(np.arange(0, 51, 5))
     plt.yticks(np.arange(0, 0.51, 0.05))
-    plt.rcParams.update({'font.size': 14})
     plt.axhline(y = 0.1, color = 'g', linestyle = ':', linewidth=3)
     plt.axhline(y = 0.2, color = 'r', linestyle = ':', linewidth=3)
     plt.xlim([0, 50])
     plt.ylim([0, 0.51])
-    plt.gca().yaxis.set_major_formatter(StrMethodFormatter('{x:,.4f}')) # 2 decimal places
-    plt.savefig('/home/n002/Documents/Pedro_Antonio/resultados/Gráficos2/'+f'S{r}.png', dpi=600, bbox_inches='tight', transparent=False, pad_inches=0.1, format='png', orientation='landscape', papertype='a4')
-    plt.close()
+    plt.legend(loc = 'upper right')
 
-    #utlizar statsmodels para estimar ISF e k
-
-
-    X = list(map(float, x.values.tolist()))
-    Y = list(map(float, y.values.tolist()))
-
-    IS0 = 0.5
-
-    #estou criando função
-    def pedrinho(X, K, ISF):
-        return  (IS0-ISF)*np.exp(-K*X)+ISF
-    #estimar parametros
-    parametros, covariancia = curve_fit(pedrinho, X, Y)
-    K = parametros[0]
-    ISF = parametros[1]
-    print(f"K: {K}; ISF:{ISF}")
-    X = pd.Series(X)
-
-
-    #utilizar parametros estimados para determinar mse e r^2
-    mse = mean_squared_error(Y,pedrinho(X, K, ISF))
-    R2_teste = r2_score(Y,pedrinho(X, K, ISF))
-
-    mse_final[r] = mse
-    r_final[r] = R2_teste
-    k_final[r] = K
-    isf_final[r] = ISF
-
-    print(mse)
-    print(R2_teste)
-            
-export_data = [mse_final, r_final, k_final, isf_final]
-
-pd.DataFrame(export_data).to_csv('/home/n002/Documents/Pedro_Antonio/efeito_dimensao_do_tambor/blocagem2/out.csv')  
+plt.savefig('/home/n002/Documents/Pedro_Antonio/resultados/graficos_sens_tamanho/'+f'RT.png', dpi=600, bbox_inches='tight', transparent=False, pad_inches=0.1, format='png', orientation='landscape')
+#plt.show()
+plt.close()
 
 
 
