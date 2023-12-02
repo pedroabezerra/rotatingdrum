@@ -37,21 +37,19 @@ k_final = np.zeros(folders)
 isf_final = np.zeros(folders)
 
 
-for r in range (1,folders,1):
-    for m in range(0, NF):
-            home = os.path.expanduser("~")
-            
-            path = f"/home/n002/Documents/Pedro_Antonio/efeito_dimensao_do_tambor/blocagem2/{r}/dados/"
-            dados = pd.read_csv(path+f'rot__{m}.csv', sep=",")
-            Dados_filter = dados.filter(items=['type', 'Points:0', 'Points:1','radius'])
+for m in range(0, NF):
+    home = os.path.expanduser("~")
+    path = f"/home/n001/Documents/Pedro_Antonio/efeito_dimensao_do_tambor/blocagem1/01/dados/rot__{m}.csv"
+    dados = pd.read_csv(path, sep=",")
+    Dados_filter = dados.filter(items=['type', 'Points:0', 'Points:1','radius'])
 
-            #filter by radius of particles
-            Dados_filter_r1 = Dados_filter.loc[(Dados_filter.type == 1)]
-            Dados_filter_r2 = Dados_filter.loc[(Dados_filter.type == 2)]
-            Dados_filter_r1.reset_index(inplace=True, drop=True)
-            Dados_filter_r2.reset_index(inplace=True, drop=True)
+    #filter by radius of particles
+    Dados_filter_r1 = Dados_filter[Dados_filter.type == 1]
+    Dados_filter_r2 = Dados_filter[Dados_filter.type == 2]
+    Dados_filter_r1.reset_index(inplace=True, drop=True)
+    Dados_filter_r2.reset_index(inplace=True, drop=True)
 
-            #calculate volumn of particles
+    #calculate volumn of particles
 
             v1 = list(4/3*(math.pi*(Dados_filter_r1['radius'])**3))
             v2 = list(4/3*(math.pi*(Dados_filter_r2['radius'])**3))

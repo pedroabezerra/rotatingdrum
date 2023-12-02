@@ -42,38 +42,49 @@ esp_x = (max_x - min_x) / nd_x
 esp_y = (max_y - min_y) / nd_y
 
 
-for m in range(0, NF):
+for m in range(0,NF):
     home = os.path.expanduser("~")
     path = f"/home/n002/Documents/Pedro_Antonio/naoesferica/ar09/dados/rot__{m}.csv"
     dados = pd.read_csv(path, sep=",")
-    Dados_filter = dados.filter(items=['id','type', 'Points:0', 'Points:1']).sort_values(by='id', axis=0, ascending=True)
-    
+    Dados_filter = dados.filter(items=['id','type', 'Points:0', 'Points:1','radius']).sort_values(by='id', axis=0, ascending=True)
+    print(Dados_filter)
     dftype1 = Dados_filter[(Dados_filter.type == 1)]
     dftype2 = Dados_filter[(Dados_filter.type == 2)]
     dftype1.reset_index(inplace=True, drop=True)
     dftype2.reset_index(inplace=True, drop=True)
 
     #DATAFRAME MEDIA DOS TIPOS
-
     dftype1_m = pd.DataFrame(dftype1.values.reshape(-1,2,dftype1.shape[1]).mean(1))
     dftype2_m = pd.DataFrame(dftype2.values.reshape(-1,3,dftype2.shape[1]).mean(1))
     dftype1_m = dftype1_m.drop(0, axis=1)
     dftype2_m = dftype2_m.drop(0, axis=1)
-    
+
+
     #RENAME COLUMNS
-    dftype1_m.columns = ['type', 'Points:0', 'Points:1']
-    dftype2_m.columns = ['type', 'Points:0', 'Points:1']
-    
+    dftype1_m.columns = ['type', 'Points:0', 'Points:1','radius']
+    dftype2_m.columns = ['type', 'Points:0', 'Points:1','radius']
+
+    #calculate volumn of particles after filter by clump sphere
+    v1 = 4/3*(math.pi*(dftype1_m['radius'])**3)
+    v2 = 4/3*(math.pi*(dftype2_m['radius'])**3)
+
+    dftype1_m['v1'] = v1
+    dftype2_m['v2'] = v2
+
     #UNIQUE DATAFRAME
-    dftype12_m = pd.concat([dftype1_m, dftype2_m])
+    Dados_filter = pd.merge(dftype1_m, dftype2_m, how='outer')
+    Dados_filter = Dados_filter.replace(np.nan, 0)
+    print(Dados_filter)
+    
+
 
     # construção do ponteiro para localização
-    cd1 = dftype12_m
-    cd1['Points:0'] = dftype12_m['Points:0'].div(esp_x).round(0) + 3
-    cd1['Points:1'] = dftype12_m['Points:1'].div(esp_y).round(0) + 3
+    cd1 = Dados_filter
+    cd1['Points:0'] = Dados_filter['Points:0'].div(esp_x).round(0) + 3
+    cd1['Points:1'] = Dados_filter['Points:1'].div(esp_y).round(0) + 3
     posicao = -5 + cd1['Points:0'] + 5 * cd1['Points:1']
     cd1 = cd1.assign(posicao=posicao.values)
-
+    print(cd1)
     # contagem de particulas repetidas em cada posição
     count = cd1.groupby(['type', 'posicao']).size().reset_index(name='count')
     count2 = pd.DataFrame(count)
@@ -125,34 +136,6 @@ z = desvio_df['Indice_2']
 
 y1 = y.rolling(5).mean()
 
-fig, ax = plt.subplots()
-#def animation_frame(i):
-    #ax.clear()
-    #ax.set_ylim(0,0.51, 0.05)
-    #ax.set_xlim(0, 31, 5)
-    #ax.set_ylabel("Indice de segregação")
-    #ax.set_xlabel("Tempo (s)")
-    #ax.set_title('Tempo x Indice de segregação')
-    
-    #line, = ax.plot(x[0:i], y1[0:i], lw=3)
-
-    #return line,
-
-
-#class LoopingPillowWriter(PillowWriter):
-    #def finish(self):
-        #self._frames[0].save(
-            #self._outfile, save_all=True, append_images=self._frames[1:],
-            #duration=int(1000 / self.fps), loop=0)
-
-#ani = animation.FuncAnimation(fig, animation_frame, interval=100, blit=True, repeat=True, frames=900) 
-
-#ani.save('/home/n001/Documents/animation.gif', dpi=150, writer=animation.LoopingPillowWriter(fps=30))
-#ani.save('/home/n001/Documents/demo2.gif', writer=LoopingPillowWriter(fps=20)) 
-#video = ani.to_html5_video()
-#html = display.HTML(video)
-
-
 
 #print(y1)
 
@@ -196,19 +179,3 @@ R2_teste = r2_score(Y,pedrinho(X, K, ISF))
 
 print(mse)
 print(R2_teste)
-
-img_g=mpimg.imread(path+'g_1.jpg')
-img_t=mpimg.imread(path+'t_1.jpeg')
-
-f, axs = plt.subplots(1,2)
-
-axs[0].imshow(img_g) 
-axs[1].imshow(img_t)
-
-axs = plt.gca()
-axs.get_xaxis().set_visible(False)
-axs.get_yaxis().set_visible(False)
-
-#axs.set_axis_off()
-#axs = axs.flatten()
-plt.show()

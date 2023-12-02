@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import StrMethodFormatter
 from matplotlib.animation import FuncAnimation
 from matplotlib import animation
+import matplotlib.image as mpimg
 from matplotlib.animation import PillowWriter    
 
 from scipy.optimize import curve_fit
@@ -69,6 +70,14 @@ for m in range(0, NF):
     Dados_filter = Dados_filter.replace(np.nan, 0)
     print(Dados_filter_r1)
 
+    path = f"/home/n002/Documents/Pedro_Antonio/naoesferica/ar09/dados/rot__{m}.csv"
+    dados = pd.read_csv(path, sep=",")
+    Dados_filter = dados.filter(items=['id','type', 'Points:0', 'Points:1']).sort_values(by='id', axis=0, ascending=True)
+    
+    dftype1 = Dados_filter[(Dados_filter.type == 1)]
+    dftype2 = Dados_filter[(Dados_filter.type == 2)]
+    dftype1.reset_index(inplace=True, drop=True)
+    dftype2.reset_index(inplace=True, drop=True)
 
     #DATAFRAME MEDIA DOS TIPOS
 
@@ -170,6 +179,14 @@ plt.close()
     #ax.set_ylabel("Indice de segregação")
     #ax.set_xlabel("Tempo (s)")
     #ax.set_title('Tempo x Indice de segregação')
+#fig, ax = plt.subplots()
+#def animation_frame(i):
+    #ax.clear()
+    #ax.set_ylim(0,0.51, 0.05)
+    #ax.set_xlim(0, 31, 5)
+    #ax.set_ylabel("Indice de segregação")
+    #ax.set_xlabel("Tempo (s)")
+    #ax.set_title('Tempo x Indice de segregação')
     
     #line, = ax.plot(x[0:i], y1[0:i], lw=3)
 
@@ -189,6 +206,27 @@ plt.close()
 
 
 #plt.show()
+#ani.save('/home/n001/Documents/animation.gif', dpi=150, writer=animation.LoopingPillowWriter(fps=30))
+#ani.save('/home/n001/Documents/demo2.gif', writer=LoopingPillowWriter(fps=20)) 
+#video = ani.to_html5_video()
+#html = display.HTML(video)
+
+
+
+#print(y1)
+
+plt.plot(x, y1, color='r', label='Indice_1', linewidth=4)
+plt.plot(x, z, color='g', label='Indice_2')
+
+plt.xlabel("Tempo")
+plt.ylabel("Indice de segregação")
+plt.title("Tempo x Indice de segregação")
+plt.xlim([0, 50])
+plt.ylim([0, 0.5])
+plt.xticks(np.arange(0, 51, 5))
+plt.yticks(np.arange(0, 0.51, 0.05))
+
+plt.show()
 
 #utlizar statsmodels para estimar ISF e k
 

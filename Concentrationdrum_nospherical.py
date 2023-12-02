@@ -6,7 +6,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib import animation
-from matplotlib.animation import PillowWriter    
+from matplotlib.animation import PillowWriter  
+  
 
 from scipy.optimize import curve_fit
 from sklearn.metrics import mean_squared_error
