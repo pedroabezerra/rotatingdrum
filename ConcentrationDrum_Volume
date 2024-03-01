@@ -12,8 +12,8 @@ from sklearn.metrics import r2_score
 from pandas import Series, DataFrame
 
 NF = 50  # number of files
-NP = 10500  # number of particles
-folders = 10
+NP = 47250  # number of particles
+
 
 #dataframes para salvar dados
 desvio_df = pd.DataFrame(columns=["Indice_1","Indice_2", 't'])
@@ -30,15 +30,10 @@ max_y = 0.075
 min_y = -0.075
 esp_x = (max_x - min_x) / nd_x
 esp_y = (max_y - min_y) / nd_y
-mse_final = np.zeros(folders)
-r_final = np.zeros(folders)
-k_final = np.zeros(folders)
-isf_final = np.zeros(folders)
-
 
 for m in range(0, NF):
     home = os.path.expanduser("~")
-    path = f"/home/n001/Documents/Pedro_Antonio/efeito_dimensao_do_tambor/blocagem1/01/dados/rot__{m}.csv"
+    path = f"/home/n002/Documents/Pedro_Antonio/efeito_dimensao_do_tambor/blocagem1/1/dados/rot__{m}.csv"
     dados = pd.read_csv(path, sep=",")
     Dados_filter = dados.filter(items=['type', 'Points:0', 'Points:1','radius'])
 
