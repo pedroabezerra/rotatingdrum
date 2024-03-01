@@ -38,6 +38,7 @@ xq1_max = dados_quad1['Points:0'].max()
 yq1_min = dados_quad1['Points:2'].min()
 yq1_max = dados_quad1['Points:2'].max()
 alfaq1 = (yq1_max - yq1_min)/(xq1_max - xq1_min)
+coef_linear1 = yq1_max - alfaq1 * xq1_max
 # Cálculo do ângulo em radianos
 angulo_radianos1 = np.arctan(abs(alfaq1))
 # Conversão de radianos para graus
@@ -48,6 +49,7 @@ xq2_max = dados_quad2['Points:0'].max()
 yq2_min = dados_quad2['Points:2'].min()
 yq2_max = dados_quad2['Points:2'].max()
 alfaq2 = (yq2_max - yq2_min)/(xq2_min - xq2_max)
+coef_linear2 = yq2_max - alfaq2 * xq2_max
 # Cálculo do ângulo em radianos
 angulo_radianos2 = np.arctan(abs(alfaq2))
 # Conversão de radianos para graus
@@ -58,6 +60,7 @@ xq3_max = dados_quad3['Points:0'].max()
 yq3_min = dados_quad3['Points:2'].min()
 yq3_max = dados_quad3['Points:2'].max()
 alfaq3 = (yq3_max - yq3_min)/(xq3_max - xq3_min)
+coef_linear3 = yq3_max - alfaq3 * xq3_max
 # Cálculo do ângulo em radianos
 angulo_radianos3 = np.arctan(abs(alfaq3))
 # Conversão de radianos para graus
@@ -68,43 +71,15 @@ xq4_max = dados_quad4['Points:0'].max()
 yq4_min = dados_quad4['Points:2'].min()
 yq4_max = dados_quad4['Points:2'].max()
 alfaq4 = (yq4_max - yq4_min)/(xq4_min - xq4_max)
+coef_linear4 = yq4_max - alfaq4 * xq4_max
 # Cálculo do ângulo em radianos
 angulo_radianos4 = np.arctan(abs(alfaq4))
 # Conversão de radianos para graus
 angulo_graus4 = abs(math.degrees(angulo_radianos4))
+
+
 t = 1
-
-def pontos_max_min(dados_quadx):
-    #cálculos pontos máximos e mínimos
-    if t == 1 or t == 3:
-        x_max = dados_quadx['Points:0'].min()
-        y_max = dados_quadx['Points:2'].max()
-    elif t == 2 or t == 4:
-        x_max = dados_quadx['Points:0'].max()
-        y_max = dados_quadx['Points:2'].max()
-    return x_max, y_max
-
-def coef_ang_linear(dados_quadx):
-
-    x_max, y_max = pontos_max_min(dados_quadx)
-
-    # Ajusta a fórmula da inclinação (m) de acordo com a orientação da reta crescente/decrescente
-    if t == 1:
-        m = (y_max - dados_quadx['Points:2'].min()) / (x_max - dados_quadx['Points:0'].min())
-    else:
-        m = -(y_max - dados_quadx['Points:2'].min()) / (x_max - dados_quadx['Points:0'].min())
-
-    # Calcula o intercepto (b)
-    b = y_max - m * x_max
-
-    # Cria a equação da reta
-    print('Equação dos pontos máximos e mínimos')
-    equation = f"y = {m:.3f}x + {b:.3f}"
-    print(equation)
-
-    return dados_quadx, m, b
-
-def calc_distan_linha(dados_quadx, m, b, t):
+def calc_distan_linha(dados_quadx, alfaqx, coef_linearx, t):
     # Criar um vetor para armazenar as distâncias
     distances = []
 
@@ -112,7 +87,7 @@ def calc_distan_linha(dados_quadx, m, b, t):
     for i in range(len(dados_quadx)):
         x = dados_quadx['Points:0'].iloc[i]
         y = dados_quadx['Points:2'].iloc[i]
-        distance = abs(y - (m * x + b)) / np.sqrt(m**2 + 1)
+        distance = abs(y - (alfaqx * x + coef_linearx)) / np.sqrt(alfaqx**2 + 1)
         distances.append(distance)
 
     # Adicionar a coluna de distâncias ao DataFrame
@@ -126,7 +101,7 @@ def calc_distan_linha(dados_quadx, m, b, t):
 
     # Filtrar os pontos com distância menor que o limite
     df_filtered = dados_quadx[dados_quadx['Distance'] < threshold]
-    return df_filtered, t, dados_quadx, m, b
+    return df_filtered, t, dados_quadx, alfaqx, coef_linearx
 
 def calcular_linha_tendencia(x, y):
 
@@ -138,7 +113,7 @@ def calcular_linha_tendencia(x, y):
     # Gera os pontos da linha de tendência
 
     x_linha = np.linspace(min(x), max(x), 100)
-    y_linha = coefs[0] + coefs[1] * x_linha\
+    y_linha = coefs[0] + coefs[1] * x_linha
     
     # Coeficiente angular
     coef_angular = modelo.params[1]
@@ -176,12 +151,15 @@ def plotar_grafico(x, y, coef_angular, intercepto, dados_quadx):
     equation = f"y = {coef_angular:.3f}x + {intercepto:.3f}"
     print(equation)
 
-for r in range(1,5):
+for r in range(4,5):
     dados_quadx = f'dados_quad{r}'
     dados_quadx = eval(dados_quadx)
     print(f'dados_quad{r}')
-    dados_quadx, m, b = coef_ang_linear(dados_quadx)
-    df_filtered, t, dados_quadx, m, b = calc_distan_linha(dados_quadx, m, b, t) 
-    t += 1
+    alfaqx = f'alfaq{r}'
+    alfaqx = eval(alfaqx)
+    coef_linearx = f'coef_linear{r}'
+    coef_linearx = eval(coef_linearx)
+    df_filtered, t, dados_quadx, alfaqx, coef_linearx = calc_distan_linha(dados_quadx, alfaqx, coef_linearx, t)
     coef_angular, intercepto, r2, x_linha, y_linha = calcular_linha_tendencia(df_filtered['Points:0'], df_filtered['Points:2'])
     plotar_grafico(df_filtered['Points:0'], df_filtered['Points:2'], coef_angular, intercepto, dados_quadx)
+
